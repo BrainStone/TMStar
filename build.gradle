@@ -4,5 +4,7 @@ plugins {
 }
 
 application {
-    targetMachines.add(machines.windows.x86_64)
+    targetMachines = [
+        machines.windows.x86_64
+    ]
 }
