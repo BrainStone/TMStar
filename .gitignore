@@ -376,3 +376,6 @@ ASALocalRun/
 
 # MSBuild Binary and Structured Log
 *.binlog
+
+# Ignore Gradle build output directory
+build
