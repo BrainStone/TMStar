@@ -1,0 +1,3 @@
+[submodule "libs/TMInterfacePublic"]
+	path = libs/TMInterfacePublic
+	url = https://github.com/donadigo/TMInterfacePublic.git
