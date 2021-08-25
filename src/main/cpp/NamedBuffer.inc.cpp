@@ -10,6 +10,9 @@
 #include <stdio.h>
 #pragma comment(lib, "user32.lib")
 
+#undef max
+#undef min
+
 template<size_t BUF_SIZE>
 NamedBuffer<BUF_SIZE>::NamedBuffer(const std::string& bufferName) : buffer(nullptr)
 {
