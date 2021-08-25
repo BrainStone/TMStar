@@ -16,11 +16,13 @@ int main() {
 	std::cout << "Successfully connected to " << bufferName << "!" << std::endl;
 
 	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_REGISTER, 0});
+	buffer.buffer.buffer[1] = 0xFF;
 
 	Sleep(1'000);
 
-	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, 0, ExecuteCommandData{false, std::string{"help"}} };
+	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, 0, ExecuteCommandData{std::string{"help"}} };
 	buffer.buffer.writeObj(message);
+	buffer.buffer.buffer[1] = 0xFF;
 
 	Sleep(1'000);
 
@@ -32,6 +34,7 @@ int main() {
 	Sleep(1'000);
 
 	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_DEREGISTER, 0});
+	buffer.buffer.buffer[1] = 0xFF;
 
 	return 0;
 }

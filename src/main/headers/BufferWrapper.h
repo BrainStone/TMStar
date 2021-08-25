@@ -13,7 +13,7 @@ public:
 	template<typename T>
 	void writeObj(const T& obj);
 	template<typename T>
-	void readObj(T& obj) const;
+	void readObj(T& obj);
 };
 
 #define BufferWrapper_Proper_Included

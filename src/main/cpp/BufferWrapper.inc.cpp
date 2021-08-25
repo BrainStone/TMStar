@@ -30,7 +30,7 @@ void BufferWrapper<BUF_SIZE>::writeObj(const T& obj)
 
 template<size_t BUF_SIZE>
 template<typename T>
-void BufferWrapper<BUF_SIZE>::readObj(T& obj) const
+void BufferWrapper<BUF_SIZE>::readObj(T& obj)
 {
 	char* pointer = reinterpret_cast<char*>(&obj);
 	constexpr size_t size = sizeof(T);

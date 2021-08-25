@@ -345,7 +345,7 @@ struct ExecuteCommandData
 	size_t commandSize;
 	char command[4096];
 
-	ExecuteCommandData(bool reserved, std::string& command) : reserved(reserved ? 1 : 0), commandSize(command.size()) {
+	ExecuteCommandData(std::string& command) : reserved(0), commandSize(command.size() + 1) {
 		std::fill(std::begin(command), std::end(command), 0);
 		std::copy(command.begin(), command.end(), std::begin(command));
 	}
