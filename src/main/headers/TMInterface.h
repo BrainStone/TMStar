@@ -34,6 +34,9 @@ enum class MessageType : uint32_t
 	  */
 	S_RESPONSE = 1,
 
+	S_ON_REGISTERED,
+	S_SHUTDOWN,
+
 	/**
 	* S_ON_RUN_STEP: server call to client to process a new run step.
 	* This will be only called when feature mode is RUN.
@@ -82,6 +85,10 @@ enum class MessageType : uint32_t
 	*
 	*/
 	S_ON_LAPS_COUNT_CHANGED,
+
+	S_ON_CUSTOM_COMMAND,
+	S_ON_BRUTEFORCE_EVALUATE,
+
 	/**
 	* C_REGISTER: client call to server to register a new client.
 	* This will be only called when feature mode is SIMULATION.
@@ -175,15 +182,6 @@ enum class MessageType : uint32_t
 	*/
 	C_SIM_GET_EVENT_BUFFER,
 	/**
-	* C_SIM_GET_CONTROL_NAMES: client call to server to retrieve current simulation event bindings.
-	*
-	* An event in an event buffer only contains a reference to what event should be executed. This
-	* reference is a 1-byte index which is used to retrieve the actual event name.
-	* Each member in the returned structure signifies the index for this event.
-	* Data: ControlNamesData
-	*/
-	C_SIM_GET_CONTROL_NAMES,
-	/**
 	* C_GET_CONTEXT_MODE: client call to server to get current context mode.
 	*
 	* Gets the current context mode, that is whether TMInterface is currently
@@ -259,6 +257,12 @@ enum class MessageType : uint32_t
 	* Data: SetTimeoutData
 	*/
 	C_SET_TIMEOUT,
+
+	C_REMOVE_STATE_VALIDATION,
+	C_PREVENT_SIMULATION_FINISH,
+	C_REGISTER_CUSTOM_COMMAND,
+	C_LOG,
+
 	ANY
 };
 
@@ -268,27 +272,45 @@ inline constexpr std::ostream& operator<<(std::ostream& os, const MessageType ty
 	switch (type)
 	{
 		ENUMSTR(S_RESPONSE)
+		ENUMSTR(S_ON_REGISTERED)
+		ENUMSTR(S_SHUTDOWN)
 		ENUMSTR(S_ON_RUN_STEP)
 		ENUMSTR(S_ON_SIM_BEGIN)
 		ENUMSTR(S_ON_SIM_STEP)
+		ENUMSTR(S_ON_SIM_END)
 		ENUMSTR(S_ON_CHECKPOINT_COUNT_CHANGED)
 		ENUMSTR(S_ON_LAPS_COUNT_CHANGED)
+		ENUMSTR(S_ON_CUSTOM_COMMAND)
+		ENUMSTR(S_ON_BRUTEFORCE_EVALUATE)
 		ENUMSTR(C_REGISTER)
 		ENUMSTR(C_DEREGISTER)
 		ENUMSTR(C_PROCESSED_CALL)
-		ENUMSTR(C_GET_CONTEXT_MODE)
 		ENUMSTR(C_SET_INPUT_STATES)
 		ENUMSTR(C_RESPAWN)
 		ENUMSTR(C_SIM_REWIND_TO_STATE)
 		ENUMSTR(C_SIM_GET_STATE)
 		ENUMSTR(C_SIM_GET_EVENT_BUFFER)
+		ENUMSTR(C_GET_CONTEXT_MODE)
 		ENUMSTR(C_SIM_SET_EVENT_BUFFER)
+		ENUMSTR(C_GET_CHECKPOINT_STATE)
+		ENUMSTR(C_SET_CHECKPOINT_STATE)
 		ENUMSTR(C_SET_GAME_SPEED)
 		ENUMSTR(C_EXECUTE_COMMAND)
 		ENUMSTR(C_SET_EXECUTE_COMMANDS)
 		ENUMSTR(C_SET_TIMEOUT)
+		ENUMSTR(C_REMOVE_STATE_VALIDATION)
+		ENUMSTR(C_PREVENT_SIMULATION_FINISH)
+		ENUMSTR(C_REGISTER_CUSTOM_COMMAND)
+		ENUMSTR(C_LOG)
 		ENUMSTR(ANY)
 	default:
+		const uint32_t converted = static_cast<uint32_t>(type);
+		if ((converted & 0xFF00) == 0xFF00) {
+			os << "Ready: " << static_cast<MessageType>(converted & 0xFF);
+		}
+		else {
+			os << "Unknown message type: " << converted;
+		}
 		break;
 	}
 
@@ -342,12 +364,12 @@ struct SetGameSpeedData
 struct ExecuteCommandData
 {
 	int32_t reserved;
-	size_t commandSize;
+	int32_t commandSize;
 	char command[4096];
 
-	ExecuteCommandData(std::string& command) : reserved(0), commandSize(command.size() + 1) {
-		std::fill(std::begin(command), std::end(command), 0);
-		std::copy(command.begin(), command.end(), std::begin(command));
+	ExecuteCommandData(std::string& command) : reserved(0), commandSize(command.size()) {
+		std::fill(std::begin(this->command), std::end(this->command), 0);
+		std::copy(command.begin(), command.end(), std::begin(this->command));
 	}
 };
 
@@ -432,18 +454,6 @@ struct SimStateData
 	}
 };
 
-struct ControlNamesData
-{
-	int32_t raceIsRunningId = -1;
-	int32_t finishLineId = -1;
-	int32_t accelerateId = -1;
-	int32_t brakeId = -1;
-	int32_t steerLeftId = -1;
-	int32_t steerRightId = -1;
-	int32_t steerId = -1;
-	int32_t respawnId = -1;
-};
-
 struct CheckpointData
 {
 	uint32_t currentCpCount = 0;
@@ -461,7 +471,7 @@ struct SimEventBufferData
 	// dynamic: CInputEvent[eventsSize]
 };
 
-enum ErrorCode
+enum class ErrorCode : int32_t
 {
 	NONE = 0,
 	RESPONSE_TOO_LONG,
@@ -469,15 +479,33 @@ enum ErrorCode
 	CLIENT_ALREADY_REGISTERED,
 
 	NO_EVENT_BUFFER,
-	INVALID_EVENT_BUFFER_SIZE,
 
 	NO_PLAYER_INFO
 };
+
+inline constexpr std::ostream& operator<<(std::ostream& os, const ErrorCode type)
+{
+#define ENUMSTR(name) case ErrorCode::##name: os << #name; break;
+	switch (type)
+	{
+		ENUMSTR(NONE)
+		ENUMSTR(RESPONSE_TOO_LONG)
+		ENUMSTR(CLIENT_ALREADY_REGISTERED)
+		ENUMSTR(NO_EVENT_BUFFER)
+		ENUMSTR(NO_PLAYER_INFO)
+	default:
+		os << "Unknown error code: " << static_cast<int32_t>(type);
+		break;
+	}
+
+#undef ENUMSTR
+	return os;
+}
 
 template<typename T>
 struct Message
 {
 	MessageType type = MessageType::ANY;
-	int32_t errorCode = 0;
+	ErrorCode errorCode = ErrorCode::NONE;
 	T data = {};
 };

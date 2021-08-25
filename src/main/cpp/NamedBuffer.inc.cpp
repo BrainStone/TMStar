@@ -42,10 +42,14 @@ NamedBuffer<BUF_SIZE>::NamedBuffer(const std::string& bufferName) : buffer(nullp
 
 		return;
 	}
+
+	buffer.zero();
 }
 
 template<size_t BUF_SIZE>
 NamedBuffer<BUF_SIZE>::~NamedBuffer() {
+	buffer.zero();
+
 	UnmapViewOfFile(buffer.buffer);
 
 	CloseHandle(hMapFile);

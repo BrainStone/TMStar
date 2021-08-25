@@ -15,25 +15,40 @@ int main() {
 
 	std::cout << "Successfully connected to " << bufferName << "!" << std::endl;
 
-	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_REGISTER, 0});
+	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_REGISTER });
 	buffer.buffer.buffer[1] = 0xFF;
 
 	Sleep(1'000);
 
-	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, 0, ExecuteCommandData{std::string{"help"}} };
+	//buffer.buffer.buffer[1] = 0x00;
+	Message<EmptyData> answer1;
+	buffer.buffer.readObj(answer1);
+
+	std::cout << answer1.type << std::endl << answer1.errorCode << std::endl;
+
+	buffer.buffer.writeObj(Message<ProcessedCallData>{ MessageType::C_PROCESSED_CALL, ErrorCode::NONE, ProcessedCallData{ MessageType::S_ON_REGISTERED } });
+	buffer.buffer.buffer[1] = 0xFF;
+
+	Sleep(1'000);
+
+	ExecuteCommandData data{ std::string{"help"} };
+	std::cout << data.commandSize << std::endl << data.command << std::endl;
+
+	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, ErrorCode::NONE, ExecuteCommandData{std::string{"help"}} };
 	buffer.buffer.writeObj(message);
 	buffer.buffer.buffer[1] = 0xFF;
 
 	Sleep(1'000);
 
-	Message<char[4086]> answer;
-	buffer.buffer.readObj(answer);
+	//buffer.buffer.buffer[1] = 0x00;
+	Message<char[4086]> answer2;
+	buffer.buffer.readObj(answer2);
 
-	std::cout << answer.type << std::endl << answer.errorCode << std::endl << answer.data + 4 << std::endl;
+	std::cout << answer2.type << std::endl << answer2.errorCode << std::endl << answer2.data + 4 << std::endl;
 
 	Sleep(1'000);
 
-	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_DEREGISTER, 0});
+	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_DEREGISTER });
 	buffer.buffer.buffer[1] = 0xFF;
 
 	return 0;
