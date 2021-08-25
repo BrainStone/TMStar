@@ -88,7 +88,7 @@ enum class MessageType : uint32_t
 	*
 	* To connect to a server, a client must first send the C_REGISTER message.
 	* The server sends an empty S_RESPONSE message back.
-	* Data: CallOnCheckpointCountChangedData
+	* Data: EmptyData
 	*/
 	C_REGISTER,
 	/**
@@ -305,7 +305,7 @@ enum SimValidationResult
 
 struct EmptyData
 {
-	int32_t reserved;
+	int32_t reserved = 0;
 };
 
 struct ProcessedCallData

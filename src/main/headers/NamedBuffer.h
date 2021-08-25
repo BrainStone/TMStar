@@ -2,10 +2,12 @@
 
 #include <string>
 
+#include "BufferWrapper.h"
+
 template<size_t BUF_SIZE>
 class NamedBuffer {
 public:
-	char* buffer;
+	BufferWrapper<BUF_SIZE> buffer;
 
 private:
 	void* hMapFile;

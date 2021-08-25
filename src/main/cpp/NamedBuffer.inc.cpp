@@ -26,7 +26,7 @@ NamedBuffer<BUF_SIZE>::NamedBuffer(const std::string& bufferName) : buffer(nullp
 		return;
 	}
 
-	buffer = reinterpret_cast<char*>(
+	buffer.buffer = reinterpret_cast<char*>(
 		MapViewOfFile(hMapFile, // handle to map object
 			FILE_MAP_ALL_ACCESS,  // read/write permission
 			0,
@@ -34,7 +34,7 @@ NamedBuffer<BUF_SIZE>::NamedBuffer(const std::string& bufferName) : buffer(nullp
 			BUF_SIZE)
 		);
 
-	if (buffer == nullptr) {
+	if (buffer.buffer == nullptr) {
 		std::cerr << "Could not map view of file (" << GetLastError() << ")." << std::endl;
 		return;
 
@@ -46,14 +46,14 @@ NamedBuffer<BUF_SIZE>::NamedBuffer(const std::string& bufferName) : buffer(nullp
 
 template<size_t BUF_SIZE>
 NamedBuffer<BUF_SIZE>::~NamedBuffer() {
-	UnmapViewOfFile(buffer);
+	UnmapViewOfFile(buffer.buffer);
 
 	CloseHandle(hMapFile);
 }
 
 template<size_t BUF_SIZE>
 bool NamedBuffer<BUF_SIZE>::isOk() {
-	return buffer != nullptr;
+	return buffer.buffer != nullptr;
 }
 
 template<size_t BUF_SIZE>

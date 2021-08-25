@@ -15,19 +15,23 @@ int main() {
 
 	std::cout << "Successfully connected to " << bufferName << "!" << std::endl;
 
-	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, 0, ExecuteCommandData{false, std::string{"help"}} };
-	char* pointer = reinterpret_cast<char*>(&message);
+	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_REGISTER, 0});
 
-	std::copy(pointer, pointer + sizeof(message), buffer.buffer);
+	Sleep(1'000);
+
+	Message<ExecuteCommandData> message{ MessageType::C_EXECUTE_COMMAND, 0, ExecuteCommandData{false, std::string{"help"}} };
+	buffer.buffer.writeObj(message);
 
 	Sleep(1'000);
 
 	Message<char[4086]> answer;
-	pointer = reinterpret_cast<char*>(&answer);
-
-	std::copy(buffer.buffer, buffer.buffer + sizeof(answer), pointer);
+	buffer.buffer.readObj(answer);
 
 	std::cout << answer.type << std::endl << answer.errorCode << std::endl << answer.data + 4 << std::endl;
+
+	Sleep(1'000);
+
+	buffer.buffer.writeObj(Message<EmptyData>{ MessageType::C_DEREGISTER, 0});
 
 	return 0;
 }
