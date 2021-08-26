@@ -1,4 +1,4 @@
-#include "NamedBuffer.h"
+#include "TMInterface/Utils/NamedBuffer.h"
 
 #include <stdio.h>
 #include <windows.h>
@@ -9,6 +9,9 @@
 
 #undef max
 #undef min
+
+namespace TMInterface {
+namespace Utils {
 
 NamedBuffer::NamedBuffer(const std::string& bufferName, size_t buf_size)
     : buf_size(buf_size), buffer(nullptr), hMapFile(nullptr) {
@@ -60,3 +63,6 @@ NamedBuffer::operator bool() const {
 void NamedBuffer::zero() {
 	std::fill_n(buffer, buf_size, 0);
 }
+
+}  // namespace Utils
+}  // namespace TMInterface

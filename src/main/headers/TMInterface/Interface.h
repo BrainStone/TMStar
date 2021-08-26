@@ -3,16 +3,14 @@
 #include <atomic>
 #include <string>
 
-#include "NamedBuffer.h"
+#include "Utils/NamedBuffer.h"
+#include "Constants.h"
 
 namespace TMInterface {
 
-constexpr size_t BUF_SIZE = 16384;
-constexpr size_t MAX_SERVERS = 16;
-
 class Interface {
 protected:
-	NamedBuffer buffer;
+	Utils::NamedBuffer buffer;
 	std::atomic_bool registered;
 
 public:
@@ -28,12 +26,4 @@ protected:
 	static std::string getNameFromIndex(size_t index);
 };
 
-class Packet {};
-
 }  // namespace TMInterface
-
-#define TMInterface_Proper_Included
-
-#include "TMInterface.inc.cpp"
-
-#undef TMInterface_Proper_Included

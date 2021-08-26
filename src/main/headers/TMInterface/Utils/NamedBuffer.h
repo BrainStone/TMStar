@@ -2,7 +2,8 @@
 
 #include <string>
 
-#include "BufferWrapper.h"
+namespace TMInterface {
+namespace Utils {
 
 class NamedBuffer {
 public:
@@ -26,3 +27,6 @@ public:
 protected:
 	void zero();
 };
+
+}  // namespace Utils
+}  // namespace TMInterface
