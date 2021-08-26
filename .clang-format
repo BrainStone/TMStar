@@ -4,8 +4,10 @@ AccessModifierOffset: '-4'
 AllowShortBlocksOnASingleLine: 'false'
 AllowShortFunctionsOnASingleLine: Empty
 ColumnLimit: '120'
+DerivePointerAlignment: 'false'
 IndentCaseLabels: 'false'
 IndentWidth: '4'
+PointerAlignment: Left
 SortIncludes: 'true'
 SortUsingDeclarations: 'true'
 TabWidth: '4'
