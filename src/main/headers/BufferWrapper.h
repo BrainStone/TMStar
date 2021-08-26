@@ -1,6 +1,6 @@
 #pragma once
 
-template<size_t BUF_SIZE>
+template <size_t BUF_SIZE>
 class BufferWrapper {
 public:
 	char* buffer;
@@ -10,9 +10,9 @@ public:
 
 	void zero(size_t amount = BUF_SIZE);
 
-	template<typename T>
+	template <typename T>
 	void writeObj(const T& obj);
-	template<typename T>
+	template <typename T>
 	void readObj(T& obj);
 };
 

@@ -21,7 +21,7 @@ public:
 
 	// Delete copy stuff
 	NamedBuffer(const NamedBuffer&) = delete;
-	NamedBuffer& operator= (const NamedBuffer&) = delete;
+	NamedBuffer& operator=(const NamedBuffer&) = delete;
 
 protected:
 	void zero();
