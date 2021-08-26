@@ -4,28 +4,25 @@
 
 #include "BufferWrapper.h"
 
-template<size_t BUF_SIZE>
 class NamedBuffer {
 public:
-	BufferWrapper<BUF_SIZE> buffer;
+	size_t buf_size;
+	char* buffer;
 
-private:
+protected:
 	void* hMapFile;
 
 public:
-	NamedBuffer(const std::string& bufferName);
+	NamedBuffer(const std::string& bufferName, size_t buf_size);
 	virtual ~NamedBuffer();
 
-	bool isOk();
-	operator bool();
+	bool isOk() const;
+	operator bool() const;
 
 	// Delete copy stuff
 	NamedBuffer(const NamedBuffer&) = delete;
 	NamedBuffer& operator= (const NamedBuffer&) = delete;
+
+protected:
+	void zero();
 };
-
-#define NamedBuffer_Proper_Included
-
-#include "NamedBuffer.inc.cpp"
-
-#undef NamedBuffer_Proper_Included
