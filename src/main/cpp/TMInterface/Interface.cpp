@@ -51,6 +51,12 @@ std::unique_ptr<Packet> Interface::receivePacket() {
 	// TODO: Only zero the package size
 	zero();
 
+	std::unique_ptr<Packet> response = packet->callCallbacks(Packet::getPacketById(packet->responsePacketId));
+
+	if (response != nullptr) {
+		sendPacket(*response);
+	}
+
 	return packet;
 }
 

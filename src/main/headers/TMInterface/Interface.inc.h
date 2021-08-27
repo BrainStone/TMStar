@@ -18,7 +18,6 @@ constexpr Interface::operator bool() const {
 }
 
 // template functions
-
 template <typename T>
 void Interface::writeObj(const T& obj) {
 	const char* pointer = reinterpret_cast<const char*>(&obj);
