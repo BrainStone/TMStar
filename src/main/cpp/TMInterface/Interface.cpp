@@ -5,7 +5,7 @@
 namespace TMInterface {
 
 Interface::Interface(const std::string& name, bool printErrors)
-    : name(name), buffer(name, BUF_SIZE, printErrors), registered(false) {}
+    : name(name), buffer(name, BUF_SIZE, printErrors), bufferOffset(0), registered(false) {}
 
 Interface::Interface(size_t index, bool printErrors) : Interface(getNameFromIndex(index), printErrors) {}
 
@@ -13,6 +13,45 @@ Interface::~Interface() {}
 
 const std::string& Interface::getName() const {
 	return name;
+}
+
+void Interface::sendPacket(const Packet& packet) {
+	zero();
+
+	writeObj(packet.packetId);
+	writeObj(ErrorCode::NONE);
+
+	packet.write(*this);
+
+	// Send packet
+	buffer.buffer[1] = 0xFF;
+}
+
+Packet& Interface::receivePacket() {
+	if (buffer.buffer[1] != 0xFF) {
+		// TODO throw error, packet not ready to receive!
+	}
+
+	buffer.buffer[1] = 0x00;
+
+	int32_t packetId;
+	ErrorCode error;
+
+	readObj(packetId);
+	readObj(error);
+
+	if (error != ErrorCode::NONE) {
+		// TODO throw error, error code received
+	}
+
+	Packet& packet = Packet::getPacketById(packetId);
+
+	packet.read(*this);
+
+	// TODO: Only zero the package size
+	zero();
+
+	return packet;
 }
 
 std::vector<std::shared_ptr<Interface>> Interface::getActiveInterfaces() {
@@ -27,6 +66,14 @@ std::vector<std::shared_ptr<Interface>> Interface::getActiveInterfaces() {
 
 	list.shrink_to_fit();
 	return list;
+}
+
+void Interface::zero(size_t amount) {
+	// TODO implement check to prevent already zeroed buffer
+	// Perrformance, not that important
+
+	std::fill_n(buffer.buffer, amount, 0);
+	bufferOffset = 0;
 }
 
 std::string Interface::getNameFromIndex(size_t index) {

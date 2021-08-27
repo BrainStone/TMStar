@@ -6,14 +6,19 @@
 #include <vector>
 
 #include "Constants.h"
+#include "Packets.h"
 #include "Utils/NamedBuffer.h"
 
 namespace TMInterface {
+
+// Forward declaration
+class Packet;
 
 class Interface {
 protected:
 	const std::string name;
 	Utils::NamedBuffer buffer;
+	std::atomic<size_t> bufferOffset;
 	std::atomic_bool registered;
 
 public:
@@ -29,19 +34,29 @@ public:
 	constexpr bool isActive() const;
 	constexpr operator bool() const;
 
+	void sendPacket(const Packet& packet);
+	Packet& receivePacket();
+
 	static std::vector<std::shared_ptr<Interface>> getActiveInterfaces();
 
 protected:
+	void zero(size_t amount = BUF_SIZE);
+
+	template <typename T>
+	void writeObj(const T& obj);
+	template <typename T>
+	void readObj(T& obj);
+
 	static std::string getNameFromIndex(size_t index);
+
+	// Packet needs access to protected member methods
+	friend Packet;
 };
 
-// constexpr functions
-constexpr bool Interface::isActive() const {
-	return buffer.isOk();
-}
-
-constexpr Interface::operator bool() const {
-	return isActive();
-}
-
 }  // namespace TMInterface
+
+#define TMInterface_Interface_Proper_Included
+
+#include "Interface.inc.h"
+
+#undef TMInterface_Interface_Proper_Included
