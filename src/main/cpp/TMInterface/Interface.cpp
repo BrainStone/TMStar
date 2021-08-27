@@ -27,7 +27,7 @@ void Interface::sendPacket(const Packet& packet) {
 	buffer.buffer[1] = 0xFF;
 }
 
-Packet& Interface::receivePacket() {
+std::unique_ptr<Packet> Interface::receivePacket() {
 	if (buffer.buffer[1] != 0xFF) {
 		// TODO throw error, packet not ready to receive!
 	}
@@ -44,9 +44,9 @@ Packet& Interface::receivePacket() {
 		// TODO throw error, error code received
 	}
 
-	Packet& packet = Packet::getPacketById(packetId);
+	std::unique_ptr<Packet> packet = Packet::getPacketById(packetId);
 
-	packet.read(*this);
+	packet->read(*this);
 
 	// TODO: Only zero the package size
 	zero();

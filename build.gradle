@@ -8,3 +8,7 @@ application {
         machines.windows.x86_64
     ]
 }
+
+tasks.withType(CppCompile).configureEach {
+    compilerArgs.addAll '/std:c++17', '/EHsc'
+}

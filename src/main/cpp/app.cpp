@@ -11,7 +11,8 @@ int main() {
 		std::cout << i->getName() << '\n';
 	}
 
-	std::cout.flush();
+	std::unique_ptr<TMInterface::Packet> packet = TMInterface::Packet::getPacketById(1);
+	std::cout << packet->packetId << ": " << packet->packetName << std::endl;
 
 	return 0;
 }

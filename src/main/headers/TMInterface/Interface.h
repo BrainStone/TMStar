@@ -14,6 +14,10 @@ namespace TMInterface {
 // Forward declaration
 class Packet;
 
+namespace Packets {
+struct S_RESPONSE;
+}
+
 class Interface {
 protected:
 	const std::string name;
@@ -35,7 +39,7 @@ public:
 	constexpr operator bool() const;
 
 	void sendPacket(const Packet& packet);
-	Packet& receivePacket();
+	std::unique_ptr<Packet> receivePacket();
 
 	static std::vector<std::shared_ptr<Interface>> getActiveInterfaces();
 
@@ -50,7 +54,8 @@ protected:
 	static std::string getNameFromIndex(size_t index);
 
 	// Packet needs access to protected member methods
-	friend Packet;
+	friend class Packet;
+	friend class Packets::S_RESPONSE;
 };
 
 }  // namespace TMInterface
