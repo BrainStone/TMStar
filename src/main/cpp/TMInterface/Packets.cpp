@@ -33,6 +33,21 @@ std::unique_ptr<Packet> Packet::getPacketById(int32_t id) {
 	return (it == registeredPackets.end()) ? nullptr : it->second();
 }
 
+EmptyPacket::EmptyPacket(int32_t packetId, const std::string& packetName, int32_t responsePacketId)
+    : Packet(packetId, packetName, responsePacketId) {}
+
+EmptyPacket::~EmptyPacket() {}
+
+void EmptyPacket::write(Interface& interface) const {
+	// technically not needed. Just to be sure
+	interface.writeObj(reserved);
+}
+
+void EmptyPacket::read(Interface& interface) {
+	// technically not needed. Just to be sure
+	interface.readObj(reserved);
+}
+
 namespace Packets {
 
 void S_RESPONSE::write(Interface& interface) const {
@@ -44,10 +59,6 @@ void S_RESPONSE::read(Interface& interface) {
 	interface.readObj(test);
 	interface.readObj(test2);
 }
-
-void S_ON_REGISTERED::write(Interface& interface) const {}
-
-void S_ON_REGISTERED::read(Interface& interface) {}
 
 }  // namespace Packets
 

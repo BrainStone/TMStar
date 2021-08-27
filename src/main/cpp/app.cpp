@@ -12,7 +12,9 @@ int main() {
 	}
 
 	std::unique_ptr<TMInterface::Packet> packet = TMInterface::Packet::getPacketById(1);
-	packet->registerCallback([](std::shared_ptr<TMInterface::Packet> packet, std::unique_ptr<TMInterface::Packet> response) {
+	TMInterface::Packets::S_RESPONSE::registerCallback(
+	    [](std::shared_ptr<TMInterface::Packets::S_RESPONSE> packet, std::unique_ptr<TMInterface::Packet> response) {
+		    std::cout << packet->test << '\n';
 		    std::cout << response->packetName << '\n';
 		    return response;
 	    });
