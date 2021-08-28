@@ -65,18 +65,12 @@ constexpr int32_t NONE_ID = 0;
 	class name;                    \
 	extern const int32_t name##_ID;
 
-#define CreateCallback(name, responsePacket)                                                                          \
-	using specializedCallback_t =                                                                                     \
-	    std::function<std::unique_ptr<responsePacket>(std::shared_ptr<name>, std::unique_ptr<responsePacket>)>;       \
-                                                                                                                      \
-	static inline void registerCallback(const specializedCallback_t& callback) {                                      \
-		name{}.Packet::registerCallback(                                                                              \
-		    [callback](std::shared_ptr<Packet> packet, std::unique_ptr<Packet> response) -> std::unique_ptr<Packet> { \
-			    return callback(std::static_pointer_cast<name>(packet),                                               \
-			                    std::unique_ptr<responsePacket>{static_cast<responsePacket*>(response.release()),     \
-			                                                    response.get_deleter()});                             \
-		    });                                                                                                       \
-	}
+#define CreateCallback(name, responsePacket)                                                                        \
+	using responsePacket_t = responsePacket;                                                                        \
+	using specializedCallback_t =                                                                                   \
+	    std::function<std::unique_ptr<responsePacket_t>(std::shared_ptr<name>, std::unique_ptr<responsePacket_t>)>; \
+                                                                                                                    \
+	static void registerCallback(const specializedCallback_t& callback);
 #define RegisterPacket(name)         \
 	inline const int32_t name##_ID = \
 	    Packet::registerPacket((__COUNTER__ - startCount) / 2 + 1, [] { return std::make_unique<name>(); });
@@ -105,12 +99,75 @@ constexpr int32_t NONE_ID = 0;
 // Forward declarations
 ForwardDeclarePacket(S_RESPONSE);
 ForwardDeclarePacket(S_ON_REGISTERED);
+ForwardDeclarePacket(S_SHUTDOWN);
+ForwardDeclarePacket(S_ON_RUN_STEP);
+ForwardDeclarePacket(S_ON_SIM_BEGIN);
+ForwardDeclarePacket(S_ON_SIM_STEP);
+ForwardDeclarePacket(S_ON_SIM_END);
+ForwardDeclarePacket(S_ON_CHECKPOINT_COUNT_CHANGED);
+ForwardDeclarePacket(S_ON_LAPS_COUNT_CHANGED);
+ForwardDeclarePacket(S_ON_CUSTOM_COMMAND);
+ForwardDeclarePacket(S_ON_BRUTEFORCE_EVALUATE);
+ForwardDeclarePacket(C_REGISTER);
+ForwardDeclarePacket(C_DEREGISTER);
+ForwardDeclarePacket(C_PROCESSED_CALL);
+ForwardDeclarePacket(C_SET_INPUT_STATES);
+ForwardDeclarePacket(C_RESPAWN);
+ForwardDeclarePacket(C_SIM_REWIND_TO_STATE);
+ForwardDeclarePacket(C_SIM_GET_STATE);
+ForwardDeclarePacket(C_SIM_GET_EVENT_BUFFER);
+ForwardDeclarePacket(C_GET_CONTEXT_MODE);
+ForwardDeclarePacket(C_SIM_SET_EVENT_BUFFER);
+ForwardDeclarePacket(C_GET_CHECKPOINT_STATE);
+ForwardDeclarePacket(C_SET_CHECKPOINT_STATE);
+ForwardDeclarePacket(C_SET_GAME_SPEED);
+ForwardDeclarePacket(C_EXECUTE_COMMAND);
+ForwardDeclarePacket(C_SET_EXECUTE_COMMANDS);
+ForwardDeclarePacket(C_SET_TIMEOUT);
+ForwardDeclarePacket(C_REMOVE_STATE_VALIDATION);
+ForwardDeclarePacket(C_PREVENT_SIMULATION_FINISH);
+ForwardDeclarePacket(C_REGISTER_CUSTOM_COMMAND);
+ForwardDeclarePacket(C_LOG);
+ForwardDeclarePacket(ANY);
 
 // Actual declarations
 DeclarePacket(S_RESPONSE, NONE, int32_t test = 0; int32_t test2 = 0;);
 
-DeclareEmptyPacket(S_ON_REGISTERED, NONE);
+DeclareEmptyPacket(S_ON_REGISTERED, C_PROCESSED_CALL);
+DeclareEmptyPacket(S_SHUTDOWN, NONE);
+DeclareEmptyPacket(S_ON_RUN_STEP, NONE);
+DeclareEmptyPacket(S_ON_SIM_BEGIN, NONE);
+DeclareEmptyPacket(S_ON_SIM_STEP, NONE);
+DeclareEmptyPacket(S_ON_SIM_END, NONE);
+DeclareEmptyPacket(S_ON_CHECKPOINT_COUNT_CHANGED, NONE);
+DeclareEmptyPacket(S_ON_LAPS_COUNT_CHANGED, NONE);
+DeclareEmptyPacket(S_ON_CUSTOM_COMMAND, NONE);
+DeclareEmptyPacket(S_ON_BRUTEFORCE_EVALUATE, NONE);
+DeclareEmptyPacket(C_REGISTER, S_ON_REGISTERED);
+DeclareEmptyPacket(C_DEREGISTER, NONE);
 
+DeclarePacket(C_PROCESSED_CALL, NONE, int32_t which = ANY_ID;);
+
+DeclareEmptyPacket(C_SET_INPUT_STATES, NONE);
+DeclareEmptyPacket(C_RESPAWN, NONE);
+DeclareEmptyPacket(C_SIM_REWIND_TO_STATE, NONE);
+DeclareEmptyPacket(C_SIM_GET_STATE, NONE);
+DeclareEmptyPacket(C_SIM_GET_EVENT_BUFFER, NONE);
+DeclareEmptyPacket(C_GET_CONTEXT_MODE, NONE);
+DeclareEmptyPacket(C_SIM_SET_EVENT_BUFFER, NONE);
+DeclareEmptyPacket(C_GET_CHECKPOINT_STATE, NONE);
+DeclareEmptyPacket(C_SET_CHECKPOINT_STATE, NONE);
+DeclareEmptyPacket(C_SET_GAME_SPEED, NONE);
+DeclareEmptyPacket(C_EXECUTE_COMMAND, NONE);
+DeclareEmptyPacket(C_SET_EXECUTE_COMMANDS, NONE);
+DeclareEmptyPacket(C_SET_TIMEOUT, NONE);
+DeclareEmptyPacket(C_REMOVE_STATE_VALIDATION, NONE);
+DeclareEmptyPacket(C_PREVENT_SIMULATION_FINISH, NONE);
+DeclareEmptyPacket(C_REGISTER_CUSTOM_COMMAND, NONE);
+DeclareEmptyPacket(C_LOG, NONE);
+DeclareEmptyPacket(ANY, NONE);
+
+// Remove evil marcos
 #undef ForwardDeclarePacket
 
 #undef CreateCallback

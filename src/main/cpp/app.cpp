@@ -1,6 +1,9 @@
 #include "app.h"
 
+#include <windows.h>
+
 #include <iostream>
+#undef interface
 
 #include "TMInterface/Interface.h"
 
@@ -11,15 +14,27 @@ int main() {
 		std::cout << i->getName() << '\n';
 	}
 
-	std::unique_ptr<TMInterface::Packet> packet = TMInterface::Packet::getPacketById(1);
 	TMInterface::Packets::S_RESPONSE::registerCallback(
 	    [](std::shared_ptr<TMInterface::Packets::S_RESPONSE> packet, std::unique_ptr<TMInterface::Packet> response) {
 		    std::cout << packet->test << '\n';
-		    std::cout << response->packetName << '\n';
+		    std::cout << ((response == nullptr) ? "null" : response->packetName) << '\n';
 		    return response;
 	    });
 
-	packet->callCallbacks(TMInterface::Packet::getPacketById(2));
+	TMInterface::Interface interface{0};
+
+	interface.sendPacket(TMInterface::Packets::C_REGISTER{});
+
+	Sleep(1'000);
+
+	std::cout << interface.receivePacket()->packetName << std::endl;
+
+	Sleep(10'000);
+
+	interface.sendPacket(TMInterface::Packets::C_DEREGISTER{});
+	Sleep(1'000);
+
+	std::cout << interface.receivePacket()->packetName << std::endl;
 
 	return 0;
 }

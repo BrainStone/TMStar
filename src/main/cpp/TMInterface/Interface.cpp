@@ -1,5 +1,6 @@
 #include "TmInterface/Interface.h"
 
+#include <iostream>
 #include <sstream>
 
 namespace TMInterface {
@@ -16,6 +17,8 @@ const std::string& Interface::getName() const {
 }
 
 void Interface::sendPacket(const Packet& packet) {
+	std::cout << "Sending packet: " << packet.packetName << std::endl;
+
 	zero();
 
 	writeObj(packet.packetId);
@@ -28,8 +31,11 @@ void Interface::sendPacket(const Packet& packet) {
 }
 
 std::unique_ptr<Packet> Interface::receivePacket() {
-	if (buffer.buffer[1] != 0xFF) {
+	bufferOffset = 0;
+
+	if (buffer.buffer[1] != (char)0xFF) {
 		// TODO throw error, packet not ready to receive!
+		std::cout << "Error! packet not ready to receive" << std::endl;
 	}
 
 	buffer.buffer[1] = 0x00;
@@ -42,9 +48,12 @@ std::unique_ptr<Packet> Interface::receivePacket() {
 
 	if (error != ErrorCode::NONE) {
 		// TODO throw error, error code received
+		std::cout << "Error! " << error << std::endl;
 	}
 
 	std::unique_ptr<Packet> packet = Packet::getPacketById(packetId);
+
+	std::cout << "Received packet: " << packetId << " -> " << packet->packetName << std::endl;
 
 	packet->read(*this);
 
